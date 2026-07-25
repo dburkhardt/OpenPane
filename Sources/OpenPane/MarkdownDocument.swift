@@ -35,7 +35,7 @@ struct MarkdownDocument: FileDocument {
     }
 
     static let welcomeText = """
-    # Welcome to FreeMark
+    # Welcome to OpenPane
 
     A free, native Markdown reader and editor for macOS.
 
@@ -51,7 +51,7 @@ struct MarkdownDocument: FileDocument {
     - [ ] Quick Look extension
     - [ ] PDF, DOCX, and EPUB publishing
 
-    > FreeMark is a clean-room feature-parity project. It does not copy the
+    > OpenPane is a clean-room feature-parity project. It does not copy the
     > branding, interface, or proprietary code of another application.
 
     ```swift

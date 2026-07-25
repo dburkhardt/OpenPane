@@ -1,5 +1,5 @@
 import Testing
-@testable import FreeMark
+@testable import OpenPane
 
 @Test func parsesHeadingsAndBlocks() {
     let model = MarkdownModel(
@@ -29,4 +29,17 @@ import Testing
     #expect(issues.contains { $0.kind == .hedge })
     #expect(issues.contains { $0.kind == .passiveVoice })
     #expect(issues.contains { $0.kind == .repeatedWord })
+}
+
+@Test func keepsHeadingIdentifiersStableAcrossParses() {
+    let source = """
+    # Title
+
+    ## Details
+    """
+
+    let first = MarkdownModel(source: source)
+    let second = MarkdownModel(source: source)
+
+    #expect(first.headings.map(\.id) == second.headings.map(\.id))
 }

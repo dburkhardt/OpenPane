@@ -2,7 +2,7 @@ import SwiftUI
 
 struct MarkdownPreview: View {
     let model: MarkdownModel
-    @Binding var selectedHeading: UUID?
+    @Binding var selectedHeading: String?
 
     @AppStorage("readingWidth") private var readingWidth = 760.0
     @AppStorage("baseFontSize") private var baseFontSize = 16.0

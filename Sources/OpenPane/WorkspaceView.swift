@@ -16,7 +16,7 @@ struct WorkspaceView: View {
     @AppStorage("workspaceMode") private var storedMode = WorkspaceMode.preview.rawValue
     @State private var showOutline = true
     @State private var showProofreader = false
-    @State private var selectedHeading: UUID?
+    @State private var selectedHeading: String?
     @State private var exportError: String?
 
     private var mode: Binding<WorkspaceMode> {

@@ -1,40 +1,55 @@
-# FreeMark
+# OpenPane
 
-FreeMark is a free, open-source, native macOS Markdown reader, editor, and
-publishing tool. It is a clean-room feature-parity project inspired by the
-useful workflows of Glance and Marked 3. It does not copy either product's
-branding, interface, assets, or proprietary implementation.
+OpenPane is a free, open-source, read-first Markdown app for macOS. It is being
+built to present documents as a beautiful native reading surface by default,
+with explicit editing and publishing tools when needed. It is a clean-room
+project inspired by useful workflows in Glance and Marked 3; it does not copy
+either product's branding, interface, assets, or proprietary implementation.
 
-The name is provisional.
+> [!IMPORTANT]
+> OpenPane is currently an early prototype, not a Glance/Marked replacement.
+> The implemented subset is listed below; the complete plan is linked under
+> **Project status**.
 
 ## What works now
 
 - Native SwiftUI document app for `.md` and plain-text files
 - Preview, source, and split modes
 - Autosave, undo, multiple windows, and standard document behavior
-- Rendered headings, paragraphs, inline emphasis, links, lists, task items,
-  quotes, dividers, and fenced code blocks
+- Rendered headings, paragraphs, inline emphasis, links, flat unordered/task
+  lists, one-line quotes, dividers, and fenced code blocks
 - Clickable document outline
 - Adjustable type size and reading width
-- Local, offline proofreading checks
-- Standalone HTML export
+- Four local, offline proofreading checks and word count
+- Basic standalone HTML export using the prototype parser
 
 ## Run it
 
-Requirements: macOS 14 or later and Xcode 16 or later.
+Requirements: macOS 26 or later and Xcode 26 or later.
 
 ```sh
 swift run
 ```
 
-Build and test:
+Build a normal app bundle:
 
 ```sh
-swift build
-swift test
+./scripts/build-app.sh
+open dist/OpenPane.app
 ```
 
-## Product principles
+Build, test, and create a release archive:
+
+```sh
+swift test
+./scripts/package-release.sh 0.0.1
+```
+
+Tagged GitHub builds publish an ad-hoc-signed prerelease, checksum, and build
+provenance. Developer ID signing and Apple notarization are required before
+OpenPane offers a normal end-user release.
+
+## Target product principles
 
 1. Native Mac interaction: SwiftUI/AppKit, document windows, system find,
    Services, Shortcuts, Quick Look, and standard menus.
@@ -50,9 +65,10 @@ swift test
 
 This is milestone 0: a compiling architectural slice. See
 [`docs/FEATURE_PARITY.md`](docs/FEATURE_PARITY.md) and
-[`docs/ROADMAP.md`](docs/ROADMAP.md).
+[`docs/ROADMAP.md`](docs/ROADMAP.md). The complete product plan, architecture,
+acceptance criteria, and release boundaries are in
+[`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).
 
 ## License
 
-The intended license is MIT. A final copyright owner should be chosen before
-the first public release.
+OpenPane is released under the [MIT License](LICENSE).

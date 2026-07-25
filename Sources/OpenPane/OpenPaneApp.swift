@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct FreeMarkApp: App {
+struct OpenPaneApp: App {
     var body: some Scene {
         DocumentGroup(newDocument: MarkdownDocument()) { configuration in
             WorkspaceView(

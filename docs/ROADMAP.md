@@ -15,7 +15,9 @@ Exit: the project builds and the core model is independently testable.
 
 - Adopt `swift-markdown` as the CommonMark/GFM syntax tree
 - Build reusable render nodes for app, Quick Look, HTML, and print
-- GFM tables, footnotes, alerts, task toggling, local images
+- GFM tables, ordered/nested lists, footnotes, alerts, and task toggling
+- Local and bounded remote images
+- Sanitized raw HTML
 - Tree-sitter syntax highlighting
 - KaTeX-compatible math layout
 - Mermaid rendering with an offline, sandboxed renderer
@@ -33,7 +35,7 @@ meaningful loss.
 - Pinch zoom and reading-width presets
 - App sandbox and hardened runtime
 
-Exit: FreeMark can replace a code editor for everyday Markdown reading.
+Exit: OpenPane can replace a code editor for everyday Markdown reading.
 
 ## M3 — Editing
 

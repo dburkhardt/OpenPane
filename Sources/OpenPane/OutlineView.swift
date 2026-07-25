@@ -2,7 +2,7 @@ import SwiftUI
 
 struct OutlineView: View {
     let model: MarkdownModel
-    @Binding var selection: UUID?
+    @Binding var selection: String?
 
     var body: some View {
         List(model.headings, selection: $selection) { heading in

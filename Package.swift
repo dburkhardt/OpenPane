@@ -1,22 +1,22 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.2
 
 import PackageDescription
 
 let package = Package(
-    name: "FreeMark",
-    platforms: [.macOS(.v14)],
+    name: "OpenPane",
+    platforms: [.macOS(.v26)],
     products: [
-        .executable(name: "FreeMark", targets: ["FreeMark"])
+        .executable(name: "OpenPane", targets: ["OpenPane"])
     ],
     targets: [
         .executableTarget(
-            name: "FreeMark",
-            path: "Sources/FreeMark"
+            name: "OpenPane",
+            path: "Sources/OpenPane"
         ),
         .testTarget(
-            name: "FreeMarkTests",
-            dependencies: ["FreeMark"],
-            path: "Tests/FreeMarkTests"
+            name: "OpenPaneTests",
+            dependencies: ["OpenPane"],
+            path: "Tests/OpenPaneTests"
         )
     ]
 )

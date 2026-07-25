@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-package:
+    name: Test and package
+    runs-on: macos-26
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Report toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Run tests
+        run: swift test --disable-sandbox
+
+      - name: Build app bundle
+        env:
+          OPENPANE_BUILD_NUMBER: ${{ github.run_number }}
+        run: ./scripts/package-release.sh "0.0.${GITHUB_RUN_NUMBER}"
+
+      - name: Validate app bundle
+        run: |
+          plutil -lint dist/OpenPane.app/Contents/Info.plist
+          codesign --verify --deep --strict dist/OpenPane.app
+          file dist/OpenPane.app/Contents/MacOS/OpenPane
+          otool -l dist/OpenPane.app/Contents/MacOS/OpenPane | grep -A4 LC_BUILD_VERSION
+          cd dist
+          shasum -a 256 -c SHA256SUMS
+
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: OpenPane-macos-arm64
+          path: |
+            dist/OpenPane-*-macos-arm64.zip
+            dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 14
