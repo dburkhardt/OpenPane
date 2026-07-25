@@ -35,7 +35,7 @@ The workflow:
 2. signs `OpenPane.app` with Developer ID Application, Hardened Runtime, and a
    secure timestamp;
 3. submits a temporary ZIP to Apple's notary service and requires `Accepted`;
-4. saves the notarization response and log as a private workflow artifact;
+4. saves the non-secret notarization response and log as a workflow artifact;
 5. staples and validates the ticket;
 6. requires Gatekeeper acceptance;
 7. creates a new ZIP from the stapled app;
