@@ -31,23 +31,27 @@ Requirements: macOS 26 or later and Xcode 26 or later.
 swift run
 ```
 
-Build a normal app bundle:
+Build a local development app bundle:
 
 ```sh
 ./scripts/build-app.sh
 open dist/OpenPane.app
 ```
 
-Build, test, and create a release archive:
+Build, test, and create an ad-hoc preview archive:
 
 ```sh
 swift test
 ./scripts/package-release.sh 0.0.1
 ```
 
-Tagged GitHub builds publish an ad-hoc-signed prerelease, checksum, and build
-provenance. Developer ID signing and Apple notarization are required before
-OpenPane offers a normal end-user release.
+Main-branch and pull-request artifacts are intentionally ad-hoc-signed developer
+previews. Tagged releases starting with `v0.0.2` must be signed with Daniel
+Burkhardt's Developer ID Application certificate, accepted by Apple's notary
+service, stapled, and validated by Gatekeeper before GitHub can publish them.
+The earlier `v0.0.1` prerelease remains an immutable, non-notarized historical
+prototype. Maintainer setup and end-to-end verification are documented in
+[`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## Target product principles
 
