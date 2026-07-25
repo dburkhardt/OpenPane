@@ -11,9 +11,11 @@ concurrency:
 
 jobs:
   release:
-    name: Build preview release
+    name: Build signed and notarized prerelease
     runs-on: macos-26
-    timeout-minutes: 25
+    timeout-minutes: 150
+    environment:
+      name: release
     permissions:
       contents: write
       id-token: write
@@ -22,7 +24,7 @@ jobs:
 
     steps:
       - name: Check out tagged source
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
@@ -37,20 +39,131 @@ jobs:
       - name: Test tagged source
         run: swift test --disable-sandbox
 
-      - name: Package app
+      - name: Verify release secrets
+        env:
+          DEVELOPER_ID_CERT_P12: ${{ secrets.DEVELOPER_ID_CERT_P12 }}
+          DEVELOPER_ID_CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [[ -n "${DEVELOPER_ID_CERT_P12}" ]] || missing+=(DEVELOPER_ID_CERT_P12)
+          [[ -n "${DEVELOPER_ID_CERT_PASSWORD}" ]] || missing+=(DEVELOPER_ID_CERT_PASSWORD)
+          [[ -n "${APPLE_ID}" ]] || missing+=(APPLE_ID)
+          [[ -n "${APPLE_TEAM_ID}" ]] || missing+=(APPLE_TEAM_ID)
+          [[ -n "${APPLE_APP_PASSWORD}" ]] || missing+=(APPLE_APP_PASSWORD)
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Missing required release secrets: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Import Developer ID certificate
+        env:
+          DEVELOPER_ID_CERT_P12: ${{ secrets.DEVELOPER_ID_CERT_P12 }}
+          DEVELOPER_ID_CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          certificate_path="${RUNNER_TEMP}/openpane-developer-id.p12"
+          keychain_path="${RUNNER_TEMP}/openpane-signing.keychain-db"
+          keychain_password="$(openssl rand -base64 32)"
+
+          printf '%s' "${DEVELOPER_ID_CERT_P12}" | base64 --decode > "${certificate_path}"
+          security create-keychain -p "${keychain_password}" "${keychain_path}"
+          security set-keychain-settings -lut 21600 "${keychain_path}"
+          security unlock-keychain -p "${keychain_password}" "${keychain_path}"
+          security import "${certificate_path}" \
+            -k "${keychain_path}" \
+            -P "${DEVELOPER_ID_CERT_PASSWORD}" \
+            -T /usr/bin/codesign
+          security list-keychains -d user -s "${keychain_path}"
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -s \
+            -k "${keychain_password}" \
+            "${keychain_path}"
+
+          identity_count="$(
+            security find-identity -v -p codesigning "${keychain_path}" |
+              grep -c "Developer ID Application" || true
+          )"
+          if [[ "${identity_count}" != "1" ]]; then
+            echo "::error::Expected exactly one Developer ID Application identity; found ${identity_count}."
+            exit 1
+          fi
+
+          identity_sha="$(
+            security find-identity -v -p codesigning "${keychain_path}" |
+              awk '/Developer ID Application/ {print $2; exit}'
+          )"
+          echo "OPENPANE_SIGNING_IDENTITY=${identity_sha}" >> "${GITHUB_ENV}"
+          echo "OPENPANE_SIGNING_KEYCHAIN=${keychain_path}" >> "${GITHUB_ENV}"
+
+      - name: Sign, notarize, staple, and package app
         env:
           OPENPANE_BUILD_NUMBER: ${{ github.run_number }}
-        run: ./scripts/package-release.sh "${OPENPANE_VERSION}"
+          OPENPANE_EXPECTED_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          OPENPANE_NOTARY_APPLE_ID: ${{ secrets.APPLE_ID }}
+          OPENPANE_NOTARY_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          OPENPANE_NOTARY_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          OPENPANE_NOTARY_TIMEOUT: 2h
+        run: ./scripts/notarize-release.sh "${OPENPANE_VERSION}"
 
-      - name: Validate release
+      - name: Validate final downloadable archive
+        env:
+          OPENPANE_EXPECTED_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          plutil -lint dist/OpenPane.app/Contents/Info.plist
-          codesign --verify --deep --strict dist/OpenPane.app
+          set -euo pipefail
+          archive="dist/OpenPane-${OPENPANE_VERSION}-macos-arm64.zip"
+          verification_dir="${RUNNER_TEMP}/openpane-release-verification"
+          /bin/rm -rf "${verification_dir}"
+          mkdir -p "${verification_dir}"
+          ditto -x -k "${archive}" "${verification_dir}"
+          app="${verification_dir}/OpenPane.app"
+
+          test -d "${app}"
+          plutil -lint "${app}/Contents/Info.plist"
+          [[ "$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "${app}/Contents/Info.plist")" == "26.0" ]]
+          [[ "$(lipo -archs "${app}/Contents/MacOS/OpenPane")" == "arm64" ]]
+          codesign --verify --deep --strict --verbose=3 "${app}"
+          xcrun stapler validate -v "${app}"
+          spctl --assess --type execute --verbose=4 "${app}"
+
+          signature="$(codesign --display --verbose=4 "${app}" 2>&1)"
+          [[ "${signature}" != *"Signature=adhoc"* ]]
+          [[ "${signature}" == *"Authority=Developer ID Application:"* ]]
+          [[ "${signature}" == *"TeamIdentifier=${OPENPANE_EXPECTED_TEAM_ID}"* ]]
+          [[ "${signature}" == *"Timestamp="* ]]
+          [[ "${signature}" == *"(runtime)"* ]]
+
           cd dist
           shasum -a 256 -c SHA256SUMS
 
+      - name: Remove signing material
+        if: always()
+        run: |
+          if [[ -n "${OPENPANE_SIGNING_KEYCHAIN:-}" ]]; then
+            security delete-keychain "${OPENPANE_SIGNING_KEYCHAIN}" || true
+          fi
+          /bin/rm -f \
+            "${RUNNER_TEMP}/openpane-developer-id.p12" \
+            "${RUNNER_TEMP}/openpane-signing.keychain-db"
+
+      - name: Upload notarization audit
+        if: always() && hashFiles('dist/notarization-result.plist') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: OpenPane-${{ env.OPENPANE_VERSION }}-notarization
+          path: |
+            dist/notarization-result.plist
+            dist/notarization-log.json
+          if-no-files-found: error
+          retention-days: 90
+
       - name: Attest release archive
-        uses: actions/attest@v4
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
         with:
           subject-path: dist/OpenPane-*-macos-arm64.zip
 
@@ -63,5 +176,6 @@ jobs:
             dist/SHA256SUMS \
             --verify-tag \
             --generate-notes \
+            --notes "Developer ID signed, Apple notarized, and stapled. OpenPane remains an early prototype." \
             --prerelease \
             --title "OpenPane ${GITHUB_REF_NAME}"

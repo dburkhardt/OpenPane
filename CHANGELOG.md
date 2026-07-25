@@ -2,6 +2,17 @@
 
 All notable changes will be documented here.
 
+## 0.0.2 — signing correction
+
+- Developer ID Application signing with Hardened Runtime and secure timestamps
+- Apple notarization with a fail-closed tagged-release workflow
+- Stapled notarization tickets and Gatekeeper validation
+- Final release archives, checksums, and provenance generated after stapling
+- Secret-free CI artifacts explicitly labeled as ad-hoc developer previews
+
+OpenPane remains an early prototype, but this release is suitable for normal
+Gatekeeper verification on supported Macs.
+
 ## 0.0.1 — prototype preview
 
 - Native SwiftUI Markdown/plain-text document shell

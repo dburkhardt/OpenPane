@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Report toolchain
         run: |
@@ -32,24 +32,26 @@ jobs:
       - name: Run tests
         run: swift test --disable-sandbox
 
-      - name: Build app bundle
+      - name: Build ad-hoc preview bundle
         env:
           OPENPANE_BUILD_NUMBER: ${{ github.run_number }}
+          OPENPANE_SIGNING_IDENTITY: "-"
         run: ./scripts/package-release.sh "0.0.${GITHUB_RUN_NUMBER}"
 
-      - name: Validate app bundle
+      - name: Validate preview bundle
         run: |
           plutil -lint dist/OpenPane.app/Contents/Info.plist
-          codesign --verify --deep --strict dist/OpenPane.app
+          codesign --verify --deep --strict --verbose=2 dist/OpenPane.app
+          codesign --display --verbose=4 dist/OpenPane.app 2>&1 | grep -q "Signature=adhoc"
           file dist/OpenPane.app/Contents/MacOS/OpenPane
           otool -l dist/OpenPane.app/Contents/MacOS/OpenPane | grep -A4 LC_BUILD_VERSION
           cd dist
           shasum -a 256 -c SHA256SUMS
 
       - name: Upload preview artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: OpenPane-macos-arm64
+          name: OpenPane-preview-macos-arm64
           path: |
             dist/OpenPane-*-macos-arm64.zip
             dist/SHA256SUMS
