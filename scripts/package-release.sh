@@ -4,7 +4,7 @@ set -euo pipefail
 
 OPENPANE_SCRIPT_DIR="${0:A:h}"
 OPENPANE_PROJECT_DIR="${OPENPANE_SCRIPT_DIR:h}"
-OPENPANE_VERSION="${1:-0.1.0}"
+OPENPANE_VERSION="${1:-0.1.1}"
 OPENPANE_BUILD_NUMBER="${OPENPANE_BUILD_NUMBER:-1}"
 OPENPANE_DIST_DIR="${OPENPANE_PROJECT_DIR}/dist"
 OPENPANE_ARCHIVE_NAME="OpenPane-${OPENPANE_VERSION}-macos-arm64.zip"
@@ -35,6 +35,8 @@ ditto \
     "${OPENPANE_ARCHIVE_PATH}"
 
 ditto -x -k "${OPENPANE_ARCHIVE_PATH}" "${OPENPANE_VERIFY_DIR}"
+"${OPENPANE_SCRIPT_DIR}/check-app-icon.sh" \
+    "${OPENPANE_VERIFY_DIR}/OpenPane.app"
 codesign \
     --verify \
     --deep \

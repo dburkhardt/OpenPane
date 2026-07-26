@@ -2,6 +2,12 @@
 
 All notable changes will be documented here.
 
+## 0.1.1 — native app icon
+
+- Custom multi-resolution OpenPane icon for the Dock, Finder, and app switcher
+- Bundle and release checks that fail if the icon declaration or `.icns` asset
+  is missing or malformed
+
 ## 0.1.0 — file workspace beta
 
 - Product pivot to a lightweight, read-first file workspace

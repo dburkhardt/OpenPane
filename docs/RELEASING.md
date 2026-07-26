@@ -52,7 +52,7 @@ After downloading the release ZIP and `SHA256SUMS`, run:
 
 ```sh
 shasum -a 256 -c SHA256SUMS
-ditto -x -k OpenPane-0.1.0-macos-arm64.zip verified
+ditto -x -k OpenPane-0.1.1-macos-arm64.zip verified
 codesign --verify --deep --strict --verbose=3 verified/OpenPane.app
 xcrun stapler validate -v verified/OpenPane.app
 spctl --assess --type execute --verbose=4 verified/OpenPane.app

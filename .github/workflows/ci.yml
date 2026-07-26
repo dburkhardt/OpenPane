@@ -43,6 +43,7 @@ jobs:
 
       - name: Validate preview bundle
         run: |
+          ./scripts/check-app-icon.sh dist/OpenPane.app
           plutil -lint dist/OpenPane.app/Contents/Info.plist
           codesign --verify --deep --strict --verbose=2 dist/OpenPane.app
           codesign --display --verbose=4 dist/OpenPane.app 2>&1 | grep -q "Signature=adhoc"

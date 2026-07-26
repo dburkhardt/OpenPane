@@ -6,7 +6,7 @@ OPENPANE_SCRIPT_DIR="${0:A:h}"
 OPENPANE_PROJECT_DIR="${OPENPANE_SCRIPT_DIR:h}"
 OPENPANE_OUTPUT_DIR="${1:-${OPENPANE_PROJECT_DIR}/dist}"
 OPENPANE_CONFIGURATION="${OPENPANE_CONFIGURATION:-release}"
-OPENPANE_VERSION="${OPENPANE_VERSION:-0.1.0}"
+OPENPANE_VERSION="${OPENPANE_VERSION:-0.1.1}"
 OPENPANE_BUILD_NUMBER="${OPENPANE_BUILD_NUMBER:-1}"
 OPENPANE_SIGNING_IDENTITY="${OPENPANE_SIGNING_IDENTITY:--}"
 OPENPANE_SIGNING_KEYCHAIN="${OPENPANE_SIGNING_KEYCHAIN:-}"
@@ -22,6 +22,8 @@ if [[ "$(uname -m)" != "arm64" ]]; then
     echo "OpenPane currently supports Apple Silicon only." >&2
     exit 1
 fi
+
+"${OPENPANE_SCRIPT_DIR}/check-app-icon.sh"
 
 function openpane_cleanup {
     /bin/rm -rf "${OPENPANE_CACHE_ROOT}"
@@ -63,6 +65,9 @@ install -m 644 \
 install -m 644 \
     "${OPENPANE_PROJECT_DIR}/THIRD_PARTY_NOTICES.md" \
     "${OPENPANE_CONTENTS_PATH}/Resources/THIRD_PARTY_NOTICES.md"
+install -m 644 \
+    "${OPENPANE_PROJECT_DIR}/Packaging/OpenPane.icns" \
+    "${OPENPANE_CONTENTS_PATH}/Resources/OpenPane.icns"
 
 find "${OPENPANE_BINARY_DIR}" \
     -maxdepth 1 \
