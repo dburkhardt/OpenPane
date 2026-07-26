@@ -17,7 +17,7 @@ let package = Package(
         // These releases explicitly compile their required external scanners.
         // Newer manifests use a cwd-sensitive FileManager check that SwiftPM 6
         // evaluates incorrectly when this package is a dependency.
-        .package(url: "https://github.com/tree-sitter/tree-sitter-css.git", exact: "0.23.2"),
+        .package(url: "https://github.com/tree-sitter/tree-sitter-css.git", exact: "0.25.0"),
         .package(url: "https://github.com/camdencheek/tree-sitter-dockerfile.git", exact: "0.2.0"),
         .package(url: "https://github.com/the-mikedavis/tree-sitter-diff.git", exact: "0.1.0"),
         .package(url: "https://github.com/tree-sitter/tree-sitter-go.git", exact: "0.25.0"),
