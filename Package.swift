@@ -28,7 +28,7 @@ let package = Package(
         .package(url: "https://github.com/tree-sitter-grammars/tree-sitter-kotlin.git", exact: "1.1.0"),
         .package(url: "https://github.com/MDeiml/tree-sitter-markdown.git", exact: "0.5.3"),
         .package(url: "https://github.com/tree-sitter-grammars/tree-sitter-objc.git", exact: "3.0.2"),
-        .package(url: "https://github.com/tree-sitter/tree-sitter-python.git", exact: "0.23.6"),
+        .package(url: "https://github.com/tree-sitter/tree-sitter-python.git", exact: "0.25.0"),
         .package(url: "https://github.com/tree-sitter/tree-sitter-rust.git", exact: "0.24.2"),
         .package(url: "https://github.com/takegue/tree-sitter-sql-bigquery.git", exact: "0.8.0"),
         .package(
