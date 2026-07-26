@@ -13,10 +13,11 @@
 - [x] Synthetic fixture validation
 - [x] Supplied-folder classification and local-link acceptance
 - [x] Accessibility behavior, hostile-file, and large-file/long-line validation
-- [ ] Signed, notarized, and stapled release validation
+- [x] Signed, notarized, and stapled release validation
 
-Release gate: tests and license checks pass, then CI publishes a Developer ID
-signed, Apple-notarized, stapled `v0.1.0` prerelease.
+Release gate completed: tests and license checks passed, and CI published the
+Developer ID signed, Apple-notarized, stapled
+[`v0.1.0` prerelease](https://github.com/dburkhardt/OpenPane/releases/tag/v0.1.0).
 
 ## Later, only when real use demands it
 
