@@ -10,7 +10,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-markdown.git", exact: "0.8.0"),
-        .package(url: "https://github.com/tree-sitter/swift-tree-sitter.git", exact: "0.10.0"),
+        .package(url: "https://github.com/tree-sitter/swift-tree-sitter.git", exact: "0.25.0"),
         .package(url: "https://github.com/tree-sitter/tree-sitter-bash.git", exact: "0.25.1"),
         .package(url: "https://github.com/tree-sitter/tree-sitter-c.git", exact: "0.24.2"),
         .package(url: "https://github.com/tree-sitter/tree-sitter-cpp.git", exact: "0.23.4"),
