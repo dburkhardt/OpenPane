@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("readingWidth") private var readingWidth = 760.0
-    @AppStorage("baseFontSize") private var baseFontSize = 16.0
+    @AppStorage("reader.readingWidth") private var readingWidth = 780.0
+    @AppStorage("reader.fontSize") private var baseFontSize = 16.0
 
     var body: some View {
         Form {
@@ -25,5 +25,6 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .padding()
         .frame(width: 470)
+        .navigationTitle("Reading")
     }
 }

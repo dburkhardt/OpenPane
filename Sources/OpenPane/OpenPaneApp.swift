@@ -2,16 +2,24 @@ import SwiftUI
 
 @main
 struct OpenPaneApp: App {
+    @NSApplicationDelegateAdaptor(OpenPaneAppDelegate.self)
+    private var appDelegate
+
     var body: some Scene {
-        DocumentGroup(newDocument: MarkdownDocument()) { configuration in
-            WorkspaceView(
-                document: configuration.$document,
-                fileURL: configuration.fileURL
-            )
+        WindowGroup(
+            "OpenPane",
+            id: "content",
+            for: WorkspaceLaunch.self
+        ) { launch in
+            WorkspaceView(launch: launch.wrappedValue)
+        } defaultValue: {
+            .restore
         }
+        .defaultSize(width: 1_120, height: 740)
+        .windowResizability(.contentMinSize)
         .commands {
             SidebarCommands()
-            TextEditingCommands()
+            OpenPaneCommands()
         }
 
         Settings {

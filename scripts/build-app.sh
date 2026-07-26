@@ -6,15 +6,17 @@ OPENPANE_SCRIPT_DIR="${0:A:h}"
 OPENPANE_PROJECT_DIR="${OPENPANE_SCRIPT_DIR:h}"
 OPENPANE_OUTPUT_DIR="${1:-${OPENPANE_PROJECT_DIR}/dist}"
 OPENPANE_CONFIGURATION="${OPENPANE_CONFIGURATION:-release}"
-OPENPANE_VERSION="${OPENPANE_VERSION:-0.0.1}"
+OPENPANE_VERSION="${OPENPANE_VERSION:-0.1.0}"
 OPENPANE_BUILD_NUMBER="${OPENPANE_BUILD_NUMBER:-1}"
 OPENPANE_SIGNING_IDENTITY="${OPENPANE_SIGNING_IDENTITY:--}"
 OPENPANE_SIGNING_KEYCHAIN="${OPENPANE_SIGNING_KEYCHAIN:-}"
 OPENPANE_EXPECTED_TEAM_ID="${OPENPANE_EXPECTED_TEAM_ID:-}"
 OPENPANE_REQUIRE_DEVELOPER_ID="${OPENPANE_REQUIRE_DEVELOPER_ID:-0}"
-OPENPANE_APP_PATH="${OPENPANE_OUTPUT_DIR}/OpenPane.app"
-OPENPANE_CONTENTS_PATH="${OPENPANE_APP_PATH}/Contents"
+OPENPANE_ENTITLEMENTS_PATH="${OPENPANE_PROJECT_DIR}/Packaging/OpenPane.entitlements"
 OPENPANE_CACHE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/openpane-build.XXXXXX")"
+OPENPANE_APP_PATH="${OPENPANE_CACHE_ROOT}/OpenPane.app"
+OPENPANE_FINAL_APP_PATH="${OPENPANE_OUTPUT_DIR}/OpenPane.app"
+OPENPANE_CONTENTS_PATH="${OPENPANE_APP_PATH}/Contents"
 
 if [[ "$(uname -m)" != "arm64" ]]; then
     echo "OpenPane currently supports Apple Silicon only." >&2
@@ -27,7 +29,7 @@ function openpane_cleanup {
 
 trap openpane_cleanup EXIT
 
-/bin/rm -rf "${OPENPANE_APP_PATH}"
+/bin/rm -rf "${OPENPANE_APP_PATH}" "${OPENPANE_FINAL_APP_PATH}"
 
 mkdir -p \
     "${OPENPANE_CONTENTS_PATH}/MacOS" \
@@ -58,6 +60,23 @@ install -m 755 \
 install -m 644 \
     "${OPENPANE_PROJECT_DIR}/Packaging/Info.plist" \
     "${OPENPANE_CONTENTS_PATH}/Info.plist"
+install -m 644 \
+    "${OPENPANE_PROJECT_DIR}/THIRD_PARTY_NOTICES.md" \
+    "${OPENPANE_CONTENTS_PATH}/Resources/THIRD_PARTY_NOTICES.md"
+
+find "${OPENPANE_BINARY_DIR}" \
+    -maxdepth 1 \
+    -type d \
+    -name '*.bundle' \
+    -print0 |
+    while IFS= read -r -d '' OPENPANE_RESOURCE_BUNDLE; do
+        ditto \
+            --noextattr \
+            --noqtn \
+            --norsrc \
+            "${OPENPANE_RESOURCE_BUNDLE}" \
+            "${OPENPANE_CONTENTS_PATH}/Resources/${OPENPANE_RESOURCE_BUNDLE:t}"
+    done
 
 /usr/libexec/PlistBuddy \
     -c "Set :CFBundleShortVersionString ${OPENPANE_VERSION}" \
@@ -79,6 +98,7 @@ OPENPANE_CODESIGN_ARGUMENTS=(
     --force
     --sign "${OPENPANE_SIGNING_IDENTITY}"
     --options runtime
+    --entitlements "${OPENPANE_ENTITLEMENTS_PATH}"
 )
 
 if [[ -n "${OPENPANE_SIGNING_KEYCHAIN}" ]]; then
@@ -125,4 +145,35 @@ if [[ "${OPENPANE_SIGNING_IDENTITY}" != "-" ]]; then
     fi
 fi
 
-echo "${OPENPANE_APP_PATH}"
+mkdir -p "${OPENPANE_OUTPUT_DIR}"
+ditto \
+    --noextattr \
+    --noqtn \
+    --norsrc \
+    "${OPENPANE_APP_PATH}" \
+    "${OPENPANE_FINAL_APP_PATH}"
+# File-provider-backed workspace folders may race to attach Finder metadata to
+# a newly copied bundle even when ditto excludes source metadata. Remove only
+# metadata from this generated app and retry the strict check a few times. The
+# release ZIP is independently verified after extraction.
+OPENPANE_FINAL_VERIFIED=0
+for OPENPANE_VERIFY_ATTEMPT in {1..5}; do
+    xattr -cr "${OPENPANE_FINAL_APP_PATH}"
+    xattr -dr com.apple.FinderInfo "${OPENPANE_FINAL_APP_PATH}" 2>/dev/null || true
+    xattr -dr com.apple.ResourceFork "${OPENPANE_FINAL_APP_PATH}" 2>/dev/null || true
+    if codesign \
+        --verify \
+        --deep \
+        --strict \
+        --verbose=2 \
+        "${OPENPANE_FINAL_APP_PATH}"; then
+        OPENPANE_FINAL_VERIFIED=1
+        break
+    fi
+done
+if [[ "${OPENPANE_FINAL_VERIFIED}" != "1" ]]; then
+    echo "The copied application did not pass strict signature verification." >&2
+    exit 1
+fi
+
+echo "${OPENPANE_FINAL_APP_PATH}"

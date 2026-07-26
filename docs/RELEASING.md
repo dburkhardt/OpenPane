@@ -42,8 +42,9 @@ The workflow:
 8. checksums and attests that final ZIP; and
 9. publishes the GitHub prerelease.
 
-`v0.0.1` is the immutable historical ad-hoc prototype. The first release using
-this pipeline is `v0.0.2`.
+`v0.0.1` is the immutable historical ad-hoc prototype. `v0.0.2` is the first
+Developer ID signed and notarized Markdown prototype. `v0.1.0` is the first
+lightweight file-workspace prerelease.
 
 ## Verify the download
 
@@ -51,7 +52,7 @@ After downloading the release ZIP and `SHA256SUMS`, run:
 
 ```sh
 shasum -a 256 -c SHA256SUMS
-ditto -x -k OpenPane-0.0.2-macos-arm64.zip verified
+ditto -x -k OpenPane-0.1.0-macos-arm64.zip verified
 codesign --verify --deep --strict --verbose=3 verified/OpenPane.app
 xcrun stapler validate -v verified/OpenPane.app
 spctl --assess --type execute --verbose=4 verified/OpenPane.app

@@ -1,77 +1,65 @@
 # OpenPane
 
-OpenPane is a free, open-source, read-first Markdown app for macOS. It is being
-built to present documents as a beautiful native reading surface by default,
-with explicit editing and publishing tools when needed. It is a clean-room
-project inspired by useful workflows in Glance and Marked 3; it does not copy
-either product's branding, interface, assets, or proprietary implementation.
+OpenPane is a free, open-source, read-first file workspace for macOS. It is
+designed for the common job of opening a folder, inspecting Markdown, JSON,
+source code, logs, PDFs, and unfamiliar files, and making an occasional
+explicit text edit without launching a full IDE.
 
 > [!IMPORTANT]
-> OpenPane is currently an early prototype, not a Glance/Marked replacement.
-> The implemented subset is listed below; the complete plan is linked under
-> **Project status**.
+> OpenPane 0.1 is a focused public prerelease, not a full IDE. Large-file
+> editing, project-wide search, Git, terminal, debugger, LSP, and extensions
+> remain deliberately out of scope.
 
-## What works now
+## Product contract
 
-- Native SwiftUI document app for `.md` and plain-text files
-- Preview, source, and split modes
-- Autosave, undo, multiple windows, and standard document behavior
-- Rendered headings, paragraphs, inline emphasis, links, flat unordered/task
-  lists, one-line quotes, dividers, and fenced code blocks
-- Clickable document outline
-- Adjustable type size and reading width
-- Four local, offline proofreading checks and word count
-- Basic standalone HTML export using the prototype parser
+- Native macOS 26+ application for Apple Silicon
+- One folder per workspace window, plus lightweight loose-file windows
+- Markdown reader, PDF reader, safe system previews, and binary inspection
+- Read-only syntax-highlighted source until the user chooses **Edit**
+- Explicit saves: merely opening or reading a file never writes it
+- Local and offline by default, with no account or telemetry
+- MIT-licensed source and Developer ID signed/notarized releases from `v0.0.2`
+  onward
 
-## Run it
+OpenPane is intentionally not an IDE. It does not include a terminal, Git UI,
+debugger, language server, extension host, formatter, or project-wide search.
+It also does not edit PDFs or binary originals.
+
+## Build and test
 
 Requirements: macOS 26 or later and Xcode 26 or later.
 
 ```sh
-swift run
-```
-
-Build a local development app bundle:
-
-```sh
+swift test
 ./scripts/build-app.sh
 open dist/OpenPane.app
 ```
 
-Build, test, and create an ad-hoc preview archive:
-
-```sh
-swift test
-./scripts/package-release.sh 0.0.1
-```
-
-Main-branch and pull-request artifacts are intentionally ad-hoc-signed developer
-previews. Tagged releases starting with `v0.0.2` must be signed with Daniel
-Burkhardt's Developer ID Application certificate, accepted by Apple's notary
-service, stapled, and validated by Gatekeeper before GitHub can publish them.
-The earlier `v0.0.1` prerelease remains an immutable, non-notarized historical
-prototype. Maintainer setup and end-to-end verification are documented in
+Main-branch and pull-request artifacts are ad-hoc-signed developer previews.
+Tagged releases from `v0.0.2` onward are signed with Developer ID, notarized by
+Apple, stapled, and validated by Gatekeeper. See
 [`docs/RELEASING.md`](docs/RELEASING.md).
 
-## Target product principles
+## File handling
 
-1. Native Mac interaction: SwiftUI/AppKit, document windows, system find,
-   Services, Shortcuts, Quick Look, and standard menus.
-2. Local-first: reading, editing, proofreading, and core export work offline.
-3. Plain files: no library import and no proprietary database.
-4. One renderer: the app, Quick Look, and every export share a conformance
-   suite so documents do not change shape between surfaces.
-5. Extensible publishing: CSS themes, custom processors, and export profiles
-   are first-class, but execute with explicit permissions.
-6. Clean-room parity: reproduce useful capabilities, not protected expression.
+Finder registration is limited to `public.text`, so OpenPane appears for text,
+Markdown, JSON, logs, source, and configuration files without competing with
+Preview for PDFs or media. A workspace can still display PDFs and other
+recognized files encountered in its folder.
 
-## Project status
+Unknown binary files open in bounded, read-only decoded-text and hex views.
+Creating editable text always produces a separate UTF-8 copy.
 
-This is milestone 0: a compiling architectural slice. See
-[`docs/FEATURE_PARITY.md`](docs/FEATURE_PARITY.md) and
-[`docs/ROADMAP.md`](docs/ROADMAP.md). The complete product plan, architecture,
-acceptance criteria, and release boundaries are in
-[`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).
+Text files up to 20 MiB support normal editing and highlighting. Larger text
+files and binary inspection use bounded, read-only views; large Markdown
+rendering, outlining, and wrapping are disabled.
+
+## Project documentation
+
+- [`docs/PRODUCT.md`](docs/PRODUCT.md) — behavior and safety contract
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — session, I/O, editor, and viewer design
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — current delivery status
+- [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) — dependency licenses
 
 ## License
 

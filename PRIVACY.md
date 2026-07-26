@@ -2,8 +2,10 @@
 
 OpenPane requires no account and includes no telemetry.
 
-The current prototype performs its core reading, editing, proofreading, and
-HTML export locally. Future remote-image support will be optional in settings
-and will use bounded requests without cookies, credentials, or referrers.
+Reading, previewing, syntax highlighting, editing, recovery, and file
+classification happen locally. OpenPane does not upload file names, contents,
+workspace paths, or usage data. Markdown does not fetch remote images.
 
-OpenPane will remain useful with networking disabled.
+The application is sandboxed and receives file access only when the user opens
+a file or folder. Persisted workspace access uses app-scoped security bookmarks.
+OpenPane is fully functional with networking disabled.

@@ -32,6 +32,9 @@ jobs:
       - name: Run tests
         run: swift test --disable-sandbox
 
+      - name: Check dependency notices
+        run: ./scripts/check-third-party-notices.sh
+
       - name: Build ad-hoc preview bundle
         env:
           OPENPANE_BUILD_NUMBER: ${{ github.run_number }}
@@ -43,6 +46,10 @@ jobs:
           plutil -lint dist/OpenPane.app/Contents/Info.plist
           codesign --verify --deep --strict --verbose=2 dist/OpenPane.app
           codesign --display --verbose=4 dist/OpenPane.app 2>&1 | grep -q "Signature=adhoc"
+          codesign --display --entitlements - --xml dist/OpenPane.app > "${RUNNER_TEMP}/openpane-entitlements.plist"
+          [[ "$(plutil -extract 'com\.apple\.security\.app-sandbox' raw -o - "${RUNNER_TEMP}/openpane-entitlements.plist")" == "true" ]]
+          [[ "$(plutil -extract 'com\.apple\.security\.files\.user-selected\.read-write' raw -o - "${RUNNER_TEMP}/openpane-entitlements.plist")" == "true" ]]
+          [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDocumentTypes:0:LSItemContentTypes:0' dist/OpenPane.app/Contents/Info.plist)" == "public.text" ]]
           file dist/OpenPane.app/Contents/MacOS/OpenPane
           otool -l dist/OpenPane.app/Contents/MacOS/OpenPane | grep -A4 LC_BUILD_VERSION
           cd dist

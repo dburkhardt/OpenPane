@@ -19,7 +19,8 @@ and `main` on a best-effort basis until version 1.0.
 
 ## Security boundary
 
-OpenPane treats every document and remote resource as untrusted. Its target
-design prohibits document-supplied JavaScript, sanitizes raw HTML, bounds
-remote resources, preserves sandboxing, and keeps future processors out of
-process with explicit permissions.
+OpenPane treats every file and workspace as untrusted. It runs in the App
+Sandbox, never executes opened content, never fetches remote Markdown resources,
+does not recursively follow directory symlinks, and never rewrites binary
+originals through a decoded text view. Coordinated writes require an explicit
+save and detect external changes before replacing a file.

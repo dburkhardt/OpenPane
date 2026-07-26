@@ -1,6 +1,13 @@
 version: 2
 
 updates:
+  - package-ecosystem: swift
+    directory: /
+    schedule:
+      interval: monthly
+    labels:
+      - dependencies
+
   - package-ecosystem: github-actions
     directory: /
     schedule:

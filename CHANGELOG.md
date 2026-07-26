@@ -2,6 +2,18 @@
 
 All notable changes will be documented here.
 
+## 0.1.0 — file workspace beta
+
+- Product pivot to a lightweight, read-first file workspace
+- One-folder workspaces, loose-file windows, tabs, splits, and Quick Open
+- Explicit text editing and saving with byte/encoding preservation
+- Curated Tree-sitter syntax highlighting
+- GFM Markdown, PDFKit, system-preview, decoded-text, and hex viewers
+- App Sandbox and text-only Finder registration
+
+This release remains a prerelease and intentionally omits IDE, publishing, PDF
+editing, binary editing, and project-wide search features.
+
 ## 0.0.2 — signing correction
 
 - Developer ID Application signing with Hardened Runtime and secure timestamps
@@ -23,5 +35,5 @@ Gatekeeper verification on supported Macs.
 - Reproducible Apple Silicon `.app` packaging
 - macOS 26 CI and tag-driven GitHub prereleases
 
-This preview is ad-hoc signed and not Apple-notarized. It is not yet the
-complete OpenPane reader described in the implementation plan.
+This historical preview is ad-hoc signed, not Apple-notarized, and predates the
+file-workspace pivot.
