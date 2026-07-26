@@ -1,5 +1,5 @@
 {
-  "originHash" : "5f47fadfeb3d162291ed4ff45950b291c963e66efe32c2b2eb400d4523f33434",
+  "originHash" : "0c2acd20d2a524cd3c18b118d5b58a381a4717baba51c240880af7b4e280f4b8",
   "pins" : [
     {
       "identity" : "swift-cmark",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tree-sitter/swift-tree-sitter.git",
       "state" : {
-        "revision" : "f97df585296977d8fcaf644cbde567151d1367b8",
-        "version" : "0.10.0"
+        "revision" : "08ef81eb8620617b55b08868126707ad72bf754f",
+        "version" : "0.25.0"
       }
     },
     {
